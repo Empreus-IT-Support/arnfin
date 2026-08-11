@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // One-off content-generation script, not part of the app build.
+    "scripts/**",
   ]),
 ]);
 

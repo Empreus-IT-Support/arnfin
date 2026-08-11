@@ -1,26 +1,301 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Brand palette sampled directly from the client's real logo:
+ * gold #FFDD00 (the box + the idea-bubbles), ink #1A1717 (the wordmark).
+ * "Outside the square" is their own tagline, and the logo already draws it:
+ * an open box, a graduation cap, ideas rising out as dots that become the
+ * "O" in ARNOLD. That box/dot vocabulary is the design system below.
+ */
+@theme {
+  --color-gold: #ffdd00;
+  /* 4.83:1 on paper — AA for the small uppercase eyebrow/label text */
+  --color-gold-dark: #8f6b00;
+  --color-gold-bright: #e0b800;
+  --color-ink: #1a1717;
+  --color-ink-soft: #2a2624;
+  --color-paper: #fffdf7;
+  --color-cream: #faf6ea;
+  --color-line: #e9e2cd;
+  /* Form-field borders need 3:1 against their background (WCAG 1.4.11).
+     --color-line is decorative only and does not meet that. */
+  --color-field: #96895c;
+  --color-muted: #6b6763;
+
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-gold);
+  color: var(--color-ink);
+}
+
+/*
+ * Faint dot lattice — the "inside the square" grid from the hero motif, reused
+ * as a background texture so section bands have substance without noise.
+ */
+.dot-grid {
+  background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: -1px -1px;
+}
+
+/* Gold rule that grows on card hover */
+.accent-rule {
+  position: relative;
+}
+.accent-rule::after {
+  content: "";
+  position: absolute;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 0;
+  height: 3px;
+  border-radius: 9999px;
+  background: var(--color-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.accent-rule:hover::after {
+  transform: scaleX(1);
+}
+
+/* ---------------------------------------------------------------- splash --
+ * Initial-load overlay. CSS-only: `forwards` fill means it always ends
+ * hidden, even with JS disabled. pointer-events stay off so it can never
+ * intercept a click on the content already rendered beneath it.
+ */
+.af-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--color-paper);
+  pointer-events: none;
+  animation: af-splash-out 1.05s ease-out forwards;
+}
+
+.af-splash__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: af-splash-lift 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.af-splash__dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.af-splash__dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-gold);
+  animation: af-splash-dot 0.9s ease-in-out infinite;
+}
+
+.af-splash__dots span:nth-child(2) { animation-delay: 0.12s; }
+.af-splash__dots span:nth-child(3) { animation-delay: 0.24s; }
+.af-splash__dots span:nth-child(4) { animation-delay: 0.36s; }
+
+@keyframes af-splash-out {
+  0%, 55% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes af-splash-lift {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes af-splash-dot {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  50% { transform: translateY(-6px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No splash at all, rather than a flash of it. */
+  .af-splash {
+    display: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  /*
+   * Long-form content defaults.
+   *
+   * These MUST live inside @layer base. Unlayered rules beat everything in
+   * Tailwind's `utilities` layer no matter how low their specificity, so an
+   * unlayered `.prose-af a:hover` silently hijacked the hover colour of every
+   * card, pill and button rendered inside an article body. Layering (plus
+   * :where() for zero specificity) lets a plain utility class win.
+   */
+  :where(.prose-af h1) {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 1.5rem + 1.6vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.1;
+    margin-bottom: 1.25rem;
+    color: var(--color-ink);
+  }
+
+  :where(.prose-af h2) {
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 1.15rem + 0.6vw, 1.6rem);
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 0.9rem;
+    color: var(--color-ink);
+  }
+
+  :where(.prose-af h3) {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    color: var(--color-ink);
+  }
+
+  :where(.prose-af p) {
+    margin-bottom: 1.1rem;
+    line-height: 1.75;
+    color: var(--color-ink-soft);
+  }
+
+  :where(.prose-af ul, .prose-af ol) {
+    margin: 0 0 1.25rem 0;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+    list-style: none;
+    padding-left: 0;
+  }
+
+  :where(.prose-af ul > li) {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  :where(.prose-af ul > li)::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 7px;
+    height: 7px;
+    border-radius: 9999px;
+    background: var(--color-gold);
+  }
+
+  :where(.prose-af ol) {
+    counter-reset: af-ol;
+  }
+
+  :where(.prose-af ol > li) {
+    counter-increment: af-ol;
+    position: relative;
+    padding-left: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  :where(.prose-af ol > li)::before {
+    content: counter(af-ol);
+    position: absolute;
+    left: 0;
+    top: -0.05em;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 9999px;
+    background: var(--color-ink);
+    color: var(--color-gold);
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Inline body links only — components opt out with their own utilities. */
+  :where(.prose-af a) {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-gold);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+  }
+
+  :where(.prose-af a:hover) {
+    color: var(--color-gold-dark);
+    text-decoration-color: var(--color-gold-dark);
+  }
+
+  :where(.prose-af table) {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+
+  :where(.prose-af th, .prose-af td) {
+    border: 1px solid var(--color-line);
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+  }
+
+  :where(.prose-af th) {
+    font-family: var(--font-display);
+    background: var(--color-cream);
+  }
+
+  :where(.prose-af em) {
+    color: var(--color-muted);
+  }
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Slim gold scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-bright);
 }
