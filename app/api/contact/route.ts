@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { rateLimited, clientIp } from "@/lib/rate-limit";
-import { EMAIL_RE, FIRM_PHONE, sendEmail, wrap } from "@/lib/email";
+import { EMAIL_RE, FIRM_PHONE, sendEmail, skippedIsFatal, wrap } from "@/lib/email";
 
 // Mirrors the enquiry form on the original site:
 // Name*, Position, Company, Telephone*, Email*, Comments
@@ -72,7 +72,14 @@ export async function POST(req: Request) {
     JSON.stringify({ name, position, company, phone, email, comments })
   );
 
-  if (outcome === "failed") {
+  // "skipped" means Resend isn't configured. In production that must not look
+  // like success — an undelivered enquiry is a lost client.
+  if (outcome === "failed" || (outcome === "skipped" && skippedIsFatal())) {
+    if (outcome === "skipped") {
+      console.error(
+        "[contact enquiry] RESEND_API_KEY is not set in production — enquiry NOT delivered."
+      );
+    }
     return NextResponse.json(
       { error: `We couldn't send your enquiry — please call ${FIRM_PHONE}.` },
       { status: 502 }

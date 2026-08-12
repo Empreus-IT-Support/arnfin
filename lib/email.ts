@@ -8,8 +8,13 @@
  *   CONTACT_RECIPIENT   defaults to arnold.finlay@arnfin.net.au
  *   RESEND_AUDIENCE_ID  optional — newsletter signups are added to this audience
  *
- * With no API key configured, submissions are logged server-side only and the
- * visitor still sees success, so the site is safe to run before DNS is set up.
+ * With no API key configured in DEVELOPMENT, submissions are logged
+ * server-side only and the visitor still sees success, so the forms are
+ * testable without credentials.
+ *
+ * In PRODUCTION a missing key is treated as a hard failure — see
+ * `skippedIsFatal`. Showing "thank you" for an enquiry that was never
+ * delivered would lose real client work, which is worse than showing an error.
  */
 
 export const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
@@ -17,6 +22,16 @@ export const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
 export const FIRM_PHONE = "(07) 5532 7244";
 
 export type SendOutcome = "sent" | "skipped" | "failed";
+
+/**
+ * Whether an unconfigured send should surface as an error to the visitor.
+ *
+ * True in production: a silent no-op there means a lost enquiry. False in dev
+ * so the forms can be exercised locally without a Resend account.
+ */
+export function skippedIsFatal(): boolean {
+  return process.env.NODE_ENV === "production";
+}
 
 export const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

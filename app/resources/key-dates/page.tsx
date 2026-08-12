@@ -16,7 +16,7 @@ type Row = { date: string; what: string; who: string };
 const GROUPS: { heading: string; note?: string; rows: Row[] }[] = [
   {
     heading: "Quarterly BAS",
-    note: "Due dates below apply when you lodge the activity statement yourself.",
+    note: "These apply when you lodge the activity statement yourself. Lodging online can give an extra two weeks, and lodging through us extends most of them further.",
     rows: [
       { date: "28 October", what: "Quarter 1 — July to September", who: "GST, PAYG instalments" },
       { date: "28 February", what: "Quarter 2 — October to December", who: "GST, PAYG instalments" },
@@ -25,21 +25,12 @@ const GROUPS: { heading: string; note?: string; rows: Row[] }[] = [
     ],
   },
   {
-    heading: "Super guarantee",
-    note: "Contributions must be received by the employee's fund by these dates, not merely sent.",
-    rows: [
-      { date: "28 October", what: "Quarter 1 — July to September", who: "Employers" },
-      { date: "28 January", what: "Quarter 2 — October to December", who: "Employers" },
-      { date: "28 April", what: "Quarter 3 — January to March", who: "Employers" },
-      { date: "28 July", what: "Quarter 4 — April to June", who: "Employers" },
-    ],
-  },
-  {
     heading: "Annual",
+    note: "If your tax agent lodges the FBT return electronically, the due date is generally 25 June rather than 21 May.",
     rows: [
       { date: "31 March", what: "FBT year ends", who: "Employers with fringe benefits" },
-      { date: "14 July", what: "Single Touch Payroll finalisation", who: "Employers" },
       { date: "21 May", what: "FBT return and payment", who: "Employers with fringe benefits" },
+      { date: "14 July", what: "Single Touch Payroll finalisation", who: "Employers" },
       { date: "28 August", what: "Taxable Payments Annual Report (TPAR)", who: "Building, cleaning, courier and similar" },
       { date: "31 October", what: "Individual income tax return", who: "Self-lodgers" },
     ],
@@ -77,6 +68,37 @@ export default function KeyDatesPage() {
           </p>
         </div>
 
+        {/* Super is no longer a fixed-date obligation, so it gets a callout
+            rather than a row in a date table. */}
+        <section className="mb-10 rounded-2xl border border-ink bg-ink p-6 text-cream">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">
+            Changed 1 July 2026
+          </p>
+          <h2 className="mt-2 font-display text-xl font-semibold text-cream">
+            Super guarantee is now paid on every payday
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-cream/85">
+            Under Payday Super, contributions must be{" "}
+            <strong className="font-semibold text-cream">
+              received by your employees&rsquo; super funds within 7 business
+              days of each payday
+            </strong>{" "}
+            &mdash; not quarterly. The old 28 October / 28 January / 28 April /
+            28 July deadlines applied to quarters ending on or before 30 June
+            2026. Some exceptions to the 7-day rule apply, such as for new
+            employees.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-cream/85">
+            Super is also now calculated on <em>qualifying earnings</em> rather
+            than ordinary time earnings, and the super guarantee charge is
+            assessed by the ATO instead of self-assessed.{" "}
+            <Link href="/contact" className="font-semibold text-gold hover:underline">
+              Talk to us
+            </Link>{" "}
+            if you&rsquo;re not sure your payroll is set up for it.
+          </p>
+        </section>
+
         <div className="space-y-10">
           {GROUPS.map((group) => (
             <section key={group.heading}>
@@ -107,6 +129,10 @@ export default function KeyDatesPage() {
         </div>
 
         <p className="mt-10 text-sm text-muted">
+          Checked against ato.gov.au on 13 August 2026. Rules change &mdash;
+          if a date matters to you, confirm it with us.
+        </p>
+        <p className="mt-2 text-sm text-muted">
           The ATO publishes the full list, including agent concessions, at{" "}
           <a
             href="https://www.ato.gov.au/tax-and-super-professionals/for-tax-professionals/prepare-and-lodge/due-dates"

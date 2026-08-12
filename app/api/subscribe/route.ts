@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { rateLimited, clientIp } from "@/lib/rate-limit";
-import { EMAIL_RE, resendKey, sendEmail, wrap } from "@/lib/email";
+import { EMAIL_RE, resendKey, sendEmail, skippedIsFatal, wrap } from "@/lib/email";
 
 // Newsletter signups go into a Resend Audience when RESEND_AUDIENCE_ID is set.
-// If no audience is configured we email the firm instead, so a signup is never
-// silently lost while the account is still being set up.
+// If no audience is configured we email the firm instead, so a signup still
+// reaches someone. If neither is configured, production returns an error
+// rather than a false "subscribed" — see skippedIsFatal in lib/email.ts.
 
 const LISTS = new Set(["Accounting News", "Your Knowledge"]);
 
@@ -103,7 +104,14 @@ export async function POST(req: Request) {
     JSON.stringify({ email, firstName, lastName, company, lists })
   );
 
-  if (outcome === "failed") {
+  // "skipped" means neither an audience nor an API key is configured. In
+  // production that must not look like success — the signup went nowhere.
+  if (outcome === "failed" || (outcome === "skipped" && skippedIsFatal())) {
+    if (outcome === "skipped") {
+      console.error(
+        "[newsletter signup] No RESEND_API_KEY / RESEND_AUDIENCE_ID in production — signup NOT recorded."
+      );
+    }
     return NextResponse.json(
       { error: "Subscription failed — please try again later." },
       { status: 502 }
