@@ -66,13 +66,24 @@ export default function Footer() {
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-cream/10 pt-6 text-xs text-cream/60 sm:flex-row sm:items-center">
           <p>&copy; {new Date().getFullYear()} Arnold &amp; Finlay Accountants &amp; Planners Pty Ltd</p>
-          <div className="flex gap-5">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 sm:justify-end">
             <Link href="/disclaimer" className="hover:text-gold">
               Disclaimer
             </Link>
             <Link href="/site-map" className="hover:text-gold">
               Site Map
             </Link>
+            <span aria-hidden className="hidden text-cream/25 sm:inline">
+              |
+            </span>
+            <a
+              href="https://www.empreus.com.au"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gold"
+            >
+              Managed by Empreus IT Support
+            </a>
           </div>
         </div>
       </div>
