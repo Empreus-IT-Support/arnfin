@@ -21,6 +21,9 @@ const inter = Inter({
   display: "swap",
 });
 
+// Off by default, so previews are never indexed. Flip to "true" at launch.
+const indexable = process.env.SITE_INDEXABLE === "true";
+
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
@@ -55,11 +58,15 @@ export const metadata: Metadata = {
     title: `${site.name} | Accountants & Planners, Southport QLD`,
     description: site.description,
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
-  },
+  // Indexing stays off until launch: set SITE_INDEXABLE=true in Vercel at the
+  // same moment DNS moves, so the .vercel.app preview is never indexed.
+  robots: indexable
+    ? {
+        index: true,
+        follow: true,
+        googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+      }
+    : { index: false, follow: false, nocache: true },
   category: "Accounting",
   formatDetection: { telephone: true, address: true, email: true },
 };
