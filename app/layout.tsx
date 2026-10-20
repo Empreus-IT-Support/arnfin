@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SplashScreen from "@/components/SplashScreen";
 import JsonLd, { accountingServiceSchema, websiteSchema } from "@/components/JsonLd";
+import { Analytics } from "@vercel/analytics/react";
 import { site } from "@/lib/site";
 
 const spaceGrotesk = Space_Grotesk({
@@ -93,10 +94,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <Header />
-        <div id="main" className="flex-1">
+        <main id="main" className="flex-1">
           {children}
-        </div>
+        </main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );

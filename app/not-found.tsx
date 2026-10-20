@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function NotFound() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 sm:py-28">
+    <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 sm:py-28">
       <DotArc className="mx-auto h-7 w-24" />
       <p className="mt-5 font-display text-sm font-semibold uppercase tracking-[0.14em] text-gold-dark">
         404
@@ -52,6 +52,6 @@ export default function NotFound() {
           )}
         </ul>
       </div>
-    </main>
+    </div>
   );
 }

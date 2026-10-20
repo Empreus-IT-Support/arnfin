@@ -49,18 +49,42 @@ const COMPLIANCE = [
 
 const STEPS = [
   {
+    step: "1",
     title: "Get in touch",
     body: "Call or email us and we will tell you exactly what we need.",
   },
   {
+    step: "2",
     title: "Sign and send",
     body: "We send you an engagement letter and Tax Agent Authority to sign and return with your paperwork.",
   },
   {
+    step: "3",
     title: "We lodge",
     body: "We prepare and quality-check your return, then lodge it electronically.",
   },
 ];
+
+/** A check-marked, two-column list. Built from divs so the prose list styles
+ *  (gold bullets) do not stack on top of the tick. */
+function TickList({ items }: { items: string[] }) {
+  return (
+    <div role="list" className="mt-5 grid gap-x-8 gap-y-1 sm:grid-cols-2">
+      {items.map((item) => (
+        <div
+          role="listitem"
+          key={item}
+          className="flex gap-3 border-b border-line py-2.5 text-[15px] leading-snug text-ink-soft"
+        >
+          <span aria-hidden className="mt-0.5 font-bold text-gold-dark">
+            &#10003;
+          </span>
+          <span>{item}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function TascTaxPage() {
   return (
@@ -88,13 +112,13 @@ export default function TascTaxPage() {
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <a
               href={`mailto:${EMAIL}`}
-              className="inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 text-sm font-semibold text-gold transition hover:bg-ink-soft"
+              className="inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 text-sm font-semibold text-gold no-underline transition hover:bg-ink-soft"
             >
               Email TASC
             </a>
             <a
               href={PHONE_HREF}
-              className="inline-flex items-center justify-center rounded-full border border-line bg-paper px-6 py-3 text-sm font-semibold text-ink transition hover:border-gold"
+              className="inline-flex items-center justify-center rounded-full border border-line bg-paper px-6 py-3 text-sm font-semibold text-ink no-underline transition hover:border-gold"
             >
               {PHONE}
             </a>
@@ -104,20 +128,21 @@ export default function TascTaxPage() {
 
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_17rem]">
-          <div className="prose-af">
+          <div className="space-y-12">
             <Reveal>
-              <section>
-                <h2>Taxation and accounting</h2>
-                <p>
+              <section aria-labelledby="tax-accounting">
+                <h2
+                  id="tax-accounting"
+                  className="font-display text-2xl font-semibold tracking-tight text-ink"
+                >
+                  Taxation and accounting
+                </h2>
+                <p className="mt-3 leading-relaxed text-ink-soft">
                   We prepare tax returns and financial statements to the
                   required standards for:
                 </p>
-                <ul>
-                  {ENTITIES.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-                <p>
+                <TickList items={ENTITIES} />
+                <p className="mt-5 leading-relaxed text-ink-soft">
                   We lodge returns electronically, and every return goes
                   through a quality check before it is lodged.
                 </p>
@@ -125,44 +150,70 @@ export default function TascTaxPage() {
             </Reveal>
 
             <Reveal>
-              <section>
-                <h2>Remote or out of area lodgement</h2>
-                <p>
-                  TASC makes it easy for clients living in remote areas to send
-                  us their paperwork and tell us what they need, using a
-                  hassle-free mail-in service.
-                </p>
-                <p>
-                  For an initial enquiry, simply give us a call, or email or
-                  mail us.
-                </p>
+              <section aria-labelledby="remote">
+                <h2
+                  id="remote"
+                  className="font-display text-2xl font-semibold tracking-tight text-ink"
+                >
+                  Remote or out of area lodgement
+                </h2>
+                <div className="mt-4 rounded-2xl border border-line bg-cream/70 p-6">
+                  <p className="leading-relaxed text-ink-soft">
+                    TASC makes it easy for clients living in remote areas to
+                    send us their paperwork and tell us what they need, using a
+                    hassle-free mail-in service.
+                  </p>
+                  <p className="mt-3 leading-relaxed text-ink-soft">
+                    For an initial enquiry, simply give us a call, or email or
+                    mail us.
+                  </p>
+                </div>
               </section>
             </Reveal>
 
-            <Reveal>
-              <section>
-                <h2>How it works</h2>
-                <ol>
-                  {STEPS.map((step) => (
-                    <li key={step.title}>
-                      <strong>{step.title}.</strong> {step.body}
-                    </li>
-                  ))}
-                </ol>
-              </section>
-            </Reveal>
+            <section aria-labelledby="how-it-works">
+              <Reveal>
+                <h2
+                  id="how-it-works"
+                  className="font-display text-2xl font-semibold tracking-tight text-ink"
+                >
+                  How it works
+                </h2>
+              </Reveal>
+              <ol className="mt-5 grid gap-6 sm:grid-cols-3">
+                {STEPS.map((s, i) => (
+                  <Reveal
+                    key={s.step}
+                    as="li"
+                    delay={i * 90}
+                    className="h-full border-t-2 border-gold pt-4"
+                  >
+                    <span className="font-display text-2xl font-semibold text-gold-dark/70">
+                      {s.step}
+                    </span>
+                    <h3 className="mt-1 font-display text-base font-semibold text-ink">
+                      {s.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                      {s.body}
+                    </p>
+                  </Reveal>
+                ))}
+              </ol>
+            </section>
 
             <Reveal>
-              <section>
-                <h2>GST, IAS, ABN, PAYG, FTC and FBT</h2>
-                <p>
+              <section aria-labelledby="compliance">
+                <h2
+                  id="compliance"
+                  className="font-display text-2xl font-semibold tracking-tight text-ink"
+                >
+                  GST, IAS, ABN, PAYG, FTC and FBT
+                </h2>
+                <p className="mt-3 leading-relaxed text-ink-soft">
                   Our team can help with any issue relating to:
                 </p>
-                <ul>
-                  {COMPLIANCE.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+                <TickList items={COMPLIANCE} />
               </section>
             </Reveal>
           </div>
@@ -218,13 +269,13 @@ export default function TascTaxPage() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
               href={`mailto:${EMAIL}`}
-              className="inline-flex items-center justify-center rounded-full bg-gold px-6 py-3 text-sm font-semibold text-ink transition hover:bg-gold-bright"
+              className="inline-flex items-center justify-center rounded-full bg-gold px-6 py-3 text-sm font-semibold text-ink no-underline transition hover:bg-gold-bright"
             >
               Email TASC
             </a>
             <a
               href={PHONE_HREF}
-              className="inline-flex items-center justify-center rounded-full border border-cream/30 px-6 py-3 text-sm font-semibold text-cream transition hover:border-gold hover:text-gold"
+              className="inline-flex items-center justify-center rounded-full border border-cream/30 px-6 py-3 text-sm font-semibold text-cream no-underline transition hover:border-gold hover:text-gold"
             >
               {PHONE}
             </a>

@@ -21,12 +21,15 @@ export default function Reveal({
   children,
   delay = 0,
   className = "",
+  as: Tag = "div",
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
+  /** Element to render. Use "li" when Reveal sits directly inside a list. */
+  as?: "div" | "li";
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement & HTMLLIElement>(null);
 
   useIsoLayoutEffect(() => {
     const el = ref.current;
@@ -59,8 +62,8 @@ export default function Reveal({
   }, [delay]);
 
   return (
-    <div ref={ref} className={className}>
+    <Tag ref={ref} className={className}>
       {children}
-    </div>
+    </Tag>
   );
 }

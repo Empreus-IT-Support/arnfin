@@ -180,12 +180,10 @@ export default function HomePage() {
 
             <ol className="grid gap-6 sm:grid-cols-3">
               {approach.map((a, i) => (
-                <Reveal key={a.step} delay={i * 90}>
-                  <li className="h-full border-t-2 border-gold pt-4">
-                    <span className="font-display text-2xl font-semibold text-gold-dark/70">{a.step}</span>
-                    <h3 className="mt-1 font-display text-base font-semibold text-ink">{a.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-ink-soft">{a.copy}</p>
-                  </li>
+                <Reveal key={a.step} as="li" delay={i * 90} className="h-full border-t-2 border-gold pt-4">
+                  <span className="font-display text-2xl font-semibold text-gold-dark/70">{a.step}</span>
+                  <h3 className="mt-1 font-display text-base font-semibold text-ink">{a.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">{a.copy}</p>
                 </Reveal>
               ))}
             </ol>

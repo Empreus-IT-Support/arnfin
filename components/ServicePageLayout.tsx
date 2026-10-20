@@ -139,7 +139,7 @@ export default function ServicePageLayout({
                         alt=""
                         width={s.imgW}
                         height={s.imgH}
-                        className="h-9 w-auto max-w-10 shrink-0"
+                        className="h-9 w-12 shrink-0 object-contain"
                       />
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold text-ink">

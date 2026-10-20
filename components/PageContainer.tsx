@@ -16,18 +16,18 @@ export default function PageContainer({
 }) {
   if (!aside) {
     return (
-      <main className="prose-af mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-14">
+      <div className="prose-af mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-14">
         {children}
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_17rem]">
         <div className="prose-af">{children}</div>
         <ContentAside />
       </div>
-    </main>
+    </div>
   );
 }
