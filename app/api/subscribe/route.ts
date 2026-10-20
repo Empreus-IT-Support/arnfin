@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { rateLimited, clientIp } from "@/lib/rate-limit";
+import { sameOrigin, tooLarge } from "@/lib/request-guard";
 import { EMAIL_RE, sendEmail, skippedIsFatal, wrap } from "@/lib/email";
 
 // Newsletter signups are emailed to the firm so someone picks them up.
@@ -15,6 +16,13 @@ import { EMAIL_RE, sendEmail, skippedIsFatal, wrap } from "@/lib/email";
 const LISTS = new Set(["Accounting News", "Your Knowledge"]);
 
 export async function POST(req: Request) {
+  if (!sameOrigin(req)) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 403 });
+  }
+  if (tooLarge(req)) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 413 });
+  }
+
   if (rateLimited(`sub:${clientIp(req)}`)) {
     return NextResponse.json(
       { error: "Too many requests — please try again in a few minutes." },
@@ -69,9 +77,12 @@ export async function POST(req: Request) {
   } catch {
     outcome = "failed";
   }
+  // Personal details only reach the logs when the email did NOT go out.
   console.log(
     `[newsletter signup] outcome=${outcome}`,
-    JSON.stringify({ email, firstName, lastName, company, lists })
+    outcome === "sent"
+      ? ""
+      : JSON.stringify({ email, firstName, lastName, company, lists })
   );
 
   // "skipped" means no Atlas key is configured. In production that must not

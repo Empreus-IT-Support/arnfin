@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
 import { rateLimited, clientIp } from "@/lib/rate-limit";
+import { sameOrigin, tooLarge } from "@/lib/request-guard";
 import { EMAIL_RE, FIRM_PHONE, sendEmail, skippedIsFatal, wrap } from "@/lib/email";
 
 // Mirrors the enquiry form on the original site:
 // Name*, Position, Company, Telephone*, Email*, Comments
 export async function POST(req: Request) {
+  if (!sameOrigin(req)) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 403 });
+  }
+  if (tooLarge(req)) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 413 });
+  }
+
   if (rateLimited(`contact:${clientIp(req)}`)) {
     return NextResponse.json(
       { error: "Too many requests — please try again in a few minutes." },
@@ -67,9 +75,13 @@ export async function POST(req: Request) {
   } catch {
     outcome = "failed";
   }
+  // Personal details only reach the logs when the email did NOT go out, so a
+  // failed enquiry can still be recovered. On success only the outcome is logged.
   console.log(
     `[contact enquiry] outcome=${outcome}`,
-    JSON.stringify({ name, position, company, phone, email, comments })
+    outcome === "sent"
+      ? ""
+      : JSON.stringify({ name, position, company, phone, email, comments })
   );
 
   // "skipped" means Atlas isn't configured. In production that must not look
