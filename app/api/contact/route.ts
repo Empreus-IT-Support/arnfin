@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const html = wrap(
+  const text = wrap(
     "New website enquiry",
     [
       ["Name", name],
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   try {
     outcome = await sendEmail({
       subject: `Website enquiry — ${name}${company ? ` (${company})` : ""}`,
-      html,
+      text,
       replyTo: email,
     });
   } catch {
@@ -72,12 +72,12 @@ export async function POST(req: Request) {
     JSON.stringify({ name, position, company, phone, email, comments })
   );
 
-  // "skipped" means Resend isn't configured. In production that must not look
+  // "skipped" means Atlas isn't configured. In production that must not look
   // like success — an undelivered enquiry is a lost client.
   if (outcome === "failed" || (outcome === "skipped" && skippedIsFatal())) {
     if (outcome === "skipped") {
       console.error(
-        "[contact enquiry] RESEND_API_KEY is not set in production — enquiry NOT delivered."
+        "[contact enquiry] ATLAS_API_KEY is not set in production — enquiry NOT delivered."
       );
     }
     return NextResponse.json(

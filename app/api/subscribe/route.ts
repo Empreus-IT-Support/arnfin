@@ -1,44 +1,18 @@
 import { NextResponse } from "next/server";
 import { rateLimited, clientIp } from "@/lib/rate-limit";
-import { EMAIL_RE, resendKey, sendEmail, skippedIsFatal, wrap } from "@/lib/email";
+import { EMAIL_RE, sendEmail, skippedIsFatal, wrap } from "@/lib/email";
 
-// Newsletter signups go into a Resend Audience when RESEND_AUDIENCE_ID is set.
-// If no audience is configured we email the firm instead, so a signup still
-// reaches someone. If neither is configured, production returns an error
-// rather than a false "subscribed" — see skippedIsFatal in lib/email.ts.
+// Newsletter signups are emailed to the firm so someone picks them up.
+//
+// This used to push the contact into a Resend Audience first. Atlas only sends
+// mail — it has no subscriber lists — so that path is gone. If the firm wants
+// signups landing in a list again, that needs a list platform (MailerLite is
+// what the other builds use) wired in alongside this notification.
+//
+// If Atlas isn't configured, production returns an error rather than a false
+// "subscribed" — see skippedIsFatal in lib/email.ts.
 
 const LISTS = new Set(["Accounting News", "Your Knowledge"]);
-
-async function addToAudience(fields: {
-  email: string;
-  firstName: string;
-  lastName: string;
-}): Promise<"sent" | "skipped" | "failed"> {
-  const key = resendKey();
-  const audienceId = (process.env.RESEND_AUDIENCE_ID || "").trim();
-  if (!key || !audienceId) return "skipped";
-
-  const res = await fetch(
-    `https://api.resend.com/audiences/${audienceId}/contacts`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: fields.email,
-        first_name: fields.firstName || undefined,
-        last_name: fields.lastName || undefined,
-        unsubscribed: false,
-      }),
-    }
-  );
-  // 409 = already subscribed, which is a success from the visitor's point of view
-  if (res.ok || res.status === 409) return "sent";
-  console.error("[newsletter signup] Resend audience error", res.status);
-  return "failed";
-}
 
 export async function POST(req: Request) {
   if (rateLimited(`sub:${clientIp(req)}`)) {
@@ -82,20 +56,16 @@ export async function POST(req: Request) {
 
   let outcome: string;
   try {
-    outcome = await addToAudience({ email, firstName, lastName });
-    if (outcome === "skipped") {
-      // No audience configured — notify the firm so the signup isn't lost.
-      outcome = await sendEmail({
-        subject: `Newsletter signup — ${email}`,
-        html: wrap("New newsletter signup", [
-          ["Name", [firstName, lastName].filter(Boolean).join(" ")],
-          ["Email", email],
-          ["Company", company],
-          ["Lists", lists.join(", ")],
-        ]),
-        replyTo: email,
-      });
-    }
+    outcome = await sendEmail({
+      subject: `Newsletter signup — ${email}`,
+      text: wrap("New newsletter signup", [
+        ["Name", [firstName, lastName].filter(Boolean).join(" ")],
+        ["Email", email],
+        ["Company", company],
+        ["Lists", lists.join(", ")],
+      ]),
+      replyTo: email,
+    });
   } catch {
     outcome = "failed";
   }
@@ -104,12 +74,12 @@ export async function POST(req: Request) {
     JSON.stringify({ email, firstName, lastName, company, lists })
   );
 
-  // "skipped" means neither an audience nor an API key is configured. In
-  // production that must not look like success — the signup went nowhere.
+  // "skipped" means no Atlas key is configured. In production that must not
+  // look like success — the signup went nowhere.
   if (outcome === "failed" || (outcome === "skipped" && skippedIsFatal())) {
     if (outcome === "skipped") {
       console.error(
-        "[newsletter signup] No RESEND_API_KEY / RESEND_AUDIENCE_ID in production — signup NOT recorded."
+        "[newsletter signup] ATLAS_API_KEY is not set in production — signup NOT recorded."
       );
     }
     return NextResponse.json(

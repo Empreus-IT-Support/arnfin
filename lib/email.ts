@@ -1,12 +1,11 @@
 /**
- * Shared Resend helpers.
+ * Shared email helpers. Delivery goes through Atlas — see lib/atlas.ts.
  *
  * Required env vars (see .env.example):
- *   RESEND_API_KEY      from the Resend dashboard
- *   CONTACT_FROM        verified sender, e.g. "Arnold & Finlay <website@arnfin.net.au>"
- *                       (the domain must be verified in Resend via DNS)
+ *   ATLAS_API_KEY       per-client key from Atlas
+ *   CONTACT_FROM        bare sender address Atlas authorises for the key,
+ *                       defaults to DoNotReply@arnfin.net.au
  *   CONTACT_RECIPIENT   defaults to arnold.finlay@arnfin.net.au
- *   RESEND_AUDIENCE_ID  optional — newsletter signups are added to this audience
  *
  * With no API key configured in DEVELOPMENT, submissions are logged
  * server-side only and the visitor still sees success, so the forms are
@@ -16,6 +15,7 @@
  * `skippedIsFatal`. Showing "thank you" for an enquiry that was never
  * delivered would lose real client work, which is worse than showing an error.
  */
+import { atlasConfigured, sendAtlasEmail } from "@/lib/atlas";
 
 export const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
 
@@ -27,77 +27,53 @@ export type SendOutcome = "sent" | "skipped" | "failed";
  * Whether an unconfigured send should surface as an error to the visitor.
  *
  * True in production: a silent no-op there means a lost enquiry. False in dev
- * so the forms can be exercised locally without a Resend account.
+ * so the forms can be exercised locally without an Atlas key.
  */
 export function skippedIsFatal(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
-export const esc = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-export function resendKey(): string | undefined {
-  return process.env.RESEND_API_KEY;
+export function mailConfigured(): boolean {
+  return atlasConfigured();
 }
 
 export function sender(): string {
-  return process.env.CONTACT_FROM ?? "Arnold & Finlay Website <onboarding@resend.dev>";
+  return process.env.CONTACT_FROM ?? "DoNotReply@arnfin.net.au";
 }
 
 export function recipient(): string {
   return process.env.CONTACT_RECIPIENT ?? "arnold.finlay@arnfin.net.au";
 }
 
-/** Simple branded wrapper so the firm's inbox copy is readable. */
+/**
+ * Lay the firm's inbox copy out as plain text. Atlas takes a text body only,
+ * so the previous branded HTML table is gone; the labelled rows survive it.
+ */
 export function wrap(title: string, rows: [string, string][], body?: string) {
-  const cells = rows
-    .filter(([, v]) => v)
-    .map(
-      ([k, v]) =>
-        `<tr><td style="padding:6px 14px 6px 0;color:#6b6763;font:14px system-ui;vertical-align:top;white-space:nowrap">${esc(
-          k
-        )}</td><td style="padding:6px 0;color:#1a1717;font:14px system-ui">${esc(v)}</td></tr>`
-    )
-    .join("");
-
-  return `<div style="font:15px/1.6 system-ui,-apple-system,sans-serif;color:#1a1717;max-width:600px">
-    <div style="border-left:4px solid #ffdd00;padding-left:14px;margin-bottom:20px">
-      <h2 style="margin:0;font-size:18px">${esc(title)}</h2>
-      <p style="margin:2px 0 0;color:#6b6763;font-size:13px">arnfin.net.au</p>
-    </div>
-    <table style="border-collapse:collapse">${cells}</table>
-    ${
-      body
-        ? `<div style="margin-top:18px;padding-top:14px;border-top:1px solid #e9e2cd">
-             <p style="margin:0 0 6px;color:#6b6763;font-size:13px">Message</p>
-             <div style="white-space:pre-wrap">${esc(body)}</div>
-           </div>`
-        : ""
-    }
-  </div>`;
+  const lines = [title, "arnfin.net.au", ""];
+  for (const [k, v] of rows) if (v) lines.push(`${k}: ${v}`);
+  if (body) lines.push("", "Message", body);
+  return lines.join("\n");
 }
 
 export async function sendEmail(opts: {
   subject: string;
-  html: string;
+  text: string;
   replyTo?: string;
 }): Promise<SendOutcome> {
-  const key = resendKey();
-  if (!key) return "skipped";
+  if (!atlasConfigured()) return "skipped";
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: sender(),
-      to: [recipient()],
-      ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
-      subject: opts.subject,
-      html: opts.html,
-    }),
+  const res = await sendAtlasEmail({
+    from: sender(),
+    to: recipient(),
+    replyTo: opts.replyTo,
+    subject: opts.subject,
+    text: opts.text,
   });
-  return res.ok ? "sent" : "failed";
+
+  if (!res.ok) {
+    console.error(`[email] Atlas send failed ${res.status}: ${res.detail}`);
+    return "failed";
+  }
+  return "sent";
 }
