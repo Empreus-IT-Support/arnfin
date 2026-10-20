@@ -52,6 +52,7 @@ export const primaryNav: NavSection[] = [
   { href: "/why-us", label: "Why Us?", children: whyUsChildren },
   { href: "/you-and-us", label: "You and Us", children: youAndUsChildren },
   { href: "/compliance", label: "Services", children: servicesChildren },
+  { href: "/tasc-tax", label: "TASC Tax" },
   { href: "/resources", label: "Resources", children: resourcesChildren },
   { href: "/blog", label: "Insights", children: insightsChildren },
   { href: "/contact", label: "Contact Us", children: contactChildren },

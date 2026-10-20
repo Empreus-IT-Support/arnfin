@@ -19,6 +19,7 @@ const STATIC: { path: string; priority: number; changeFrequency: MetadataRoute.S
   { path: "/you-and-us/the-numbers", priority: 0.6, changeFrequency: "yearly" },
   { path: "/you-and-us/services", priority: 0.6, changeFrequency: "yearly" },
   { path: "/you-and-us/our-approach", priority: 0.6, changeFrequency: "yearly" },
+  { path: "/tasc-tax", priority: 0.8, changeFrequency: "yearly" },
   { path: "/most-requested", priority: 0.7, changeFrequency: "yearly" },
   { path: "/blog", priority: 0.8, changeFrequency: "monthly" },
   { path: "/resources", priority: 0.6, changeFrequency: "yearly" },
