@@ -32,6 +32,7 @@ const STATIC: { path: string; priority: number; changeFrequency: MetadataRoute.S
   { path: "/covid-19-support", priority: 0.3, changeFrequency: "yearly" },
   { path: "/contact/location-map", priority: 0.5, changeFrequency: "yearly" },
   { path: "/site-map", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/privacy-policy", priority: 0.2, changeFrequency: "yearly" },
   { path: "/disclaimer", priority: 0.2, changeFrequency: "yearly" },
 ];
 
