@@ -33,24 +33,10 @@ const GROUPS: { heading: string; links: { text: string; href: string }[] }[] = [
     ],
   },
   {
-    heading: "Funding / Government",
-    links: [
-      {
-        text: "Government grants",
-        href: "http://www.business.gov.au/BusinessTopics/Grantsandassistance/Pages/default.aspx",
-      },
-      { text: "AVCAL", href: "https://aic.co/AIC/AIC/Home.aspx" },
-    ],
-  },
-  {
     heading: "Financial Institutions",
     links: [
       { text: "ANZ", href: "http://www.anz.com/small-business/" },
       { text: "Commonwealth Bank", href: "https://www.commbank.com.au/" },
-      {
-        text: "National Australia Bank",
-        href: "http://www.nab.com.au/wps/wcm/connect/nab/nab/home/business_solutions/",
-      },
       {
         text: "Westpac",
         href: "http://www.westpac.com.au/internet/publish.nsf/Content/BB+HomePage",
@@ -60,11 +46,6 @@ const GROUPS: { heading: string; links: { text: string; href: string }[] }[] = [
         text: "Bendigo Bank",
         href: "http://www.bendigobank.com.au/public/Business/index.asp",
       },
-      {
-        text: "Macquarie Bank",
-        href: "http://www.macquarie.com.au/au/business/index.html",
-      },
-      { text: "St George Bank", href: "http://www.stgeorge.com.au/small-business/" },
     ],
   },
   {
@@ -107,10 +88,6 @@ const GROUPS: { heading: string; links: { text: string; href: string }[] }[] = [
       { text: "Health & Safety", href: "https://www.safeworkaustralia.gov.au/" },
       { text: "Leave & Public Holidays", href: "https://www.fairwork.gov.au/leave" },
       {
-        text: "Resolving Industrial Relations Disputes",
-        href: "http://www.airc.gov.au/index.htm",
-      },
-      {
         text: "Terminating Employment",
         href: "https://www.fairwork.gov.au/ending-employment",
       },
@@ -140,9 +117,6 @@ const GROUPS: { heading: string; links: { text: string; href: string }[] }[] = [
       { text: "The Australian", href: "https://www.theaustralian.com.au/" },
       { text: "The Age", href: "http://www.theage.com.au/" },
       { text: "The Sydney Morning Herald", href: "http://www.smh.com.au/" },
-      { text: "The Herald Sun", href: "http://www.news.com.au/heraldsun/" },
-      { text: "The Advertiser", href: "http://www.news.com.au/adelaidenow/" },
-      { text: "The Courier-Mail", href: "http://www.news.com.au/couriermail/" },
       { text: "The Daily Telegraph", href: "http://www.dailytelegraph.com.au/" },
       { text: "The Mercury", href: "http://www.themercury.com.au/" },
       { text: "The Australian Financial review", href: "https://www.afr.com/" },
